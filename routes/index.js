@@ -20,15 +20,12 @@ router.get('/dashboard', ensureAuth, async(req, res) => {
         const blogs = await Blog.find({ user: req.user.id }).lean();
         res.render('dashboard', {
             name: req.user.firstName,
-            blogs
+            blogs,
         });
     } catch (error) {
         console.error(error);
         res.render('error/500');
     }
-
-    
-
     
 });
 

@@ -56,9 +56,14 @@ router.get('/:id', ensureAuth, async(req, res) => {
             return res.render('error/404');
         }
 
-        res.render('blogs/show', {
-            blog
-        });
+        if(blog.user._id != req.user.id && blog.status == 'private') {
+            res.render('error/404');
+        } else {
+            res.render('blogs/show', {
+                blog
+            });
+        }
+        
     } catch (error) {
         console.error(error);
         res.render('error/404');
@@ -72,7 +77,7 @@ router.get('/:id', ensureAuth, async(req, res) => {
 router.get('/edit/:id', ensureAuth, async(req, res) => {
     try {
         const blog = await Blog.findOne({
-            _id: req.params.id
+            _id: req.params.id,
         }).lean();
     
         if(!blog) {
@@ -97,6 +102,7 @@ router.get('/edit/:id', ensureAuth, async(req, res) => {
 router.put('/:id', ensureAuth, async(req, res) => {
     try {
         let blog = await Blog.findById(req.params.id).lean();
+
         if(!blog) {
             return res.render('error/404');
         }
@@ -123,9 +129,19 @@ router.put('/:id', ensureAuth, async(req, res) => {
 // @route DELETE /blogs/:id
 router.delete('/:id', ensureAuth, async(req, res) => {
     try {
-        await Blog.remove({ _id: req.params.id });
-        res.redirect('/dashboard');
-    } catch (error) {
+        let blog = await Blog.findById(req.params.id).lean()
+
+        if(!blog) {
+            return res.render('error/404');
+        }
+
+        if(blog.user != req.user.id) {
+            res.redirect('/blogs');
+        } else {
+            await Blog.remove({ _id: req.params.id });
+            res.redirect('/dashboard');
+        }
+    } catch(error) {
         console.error(error);
         return res.render('error/500');
     }
