@@ -29,4 +29,8 @@ router.get('/dashboard', ensureAuth, async(req, res) => {
     
 });
 
+router.get('/files', ensureAuth, (req, res) => {
+    res.render('files');
+});
+
 module.exports = router;
